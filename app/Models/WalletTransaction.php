@@ -9,7 +9,7 @@ class WalletTransaction extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'midtrans_order_id', 'amount', 'type', 'status', 'description', 'reference_user_id'];
+    protected $fillable = ['user_id', 'order_id', 'amount', 'type', 'status', 'description', 'reference_user_id'];
 
     public function user()
     {
