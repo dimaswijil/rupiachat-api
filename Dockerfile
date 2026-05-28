@@ -21,5 +21,5 @@ RUN php artisan config:cache && \
     php artisan route:cache && \
     php artisan view:cache
 
-# Expose port web server (Render akan otomatis melakukan binding ke port yang sesuai)
-EXPOSE 80
+# Jalankan migrasi database saat kontainer dijalankan (runtime) sebelum menyalakan web server
+CMD php artisan migrate --force && /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
