@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "framework": null,
+  "clean_build": true,
+  "functions": {
+    "api/index.php": {
+      "runtime": "vercel-php@8.2"
+    }
+  },
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "api/index.php"
+    }
+  ]
+}
