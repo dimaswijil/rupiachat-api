@@ -48,8 +48,8 @@ class WalletController extends Controller
             'external_id' => $orderId,
             'amount' => (int) $request->amount,
             'description' => 'Top Up Saldo RupiaChat',
-            'success_redirect_url' => 'https://rupiachat.com/success',
-            'failure_redirect_url' => 'https://rupiachat.com/failed',
+            'success_redirect_url' => 'https://example.com/success',
+            'failure_redirect_url' => 'https://example.com/failed',
         ];
 
         try {
