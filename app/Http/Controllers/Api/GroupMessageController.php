@@ -56,7 +56,7 @@ class GroupMessageController extends Controller
                     'sender_id'   => (string) $m->sender_id,
                     'sender_name' => $sender ? $sender->name : 'Unknown',
                     'sender_photo'=> $sender ? $sender->profile_photo : null,
-                    'text'        => in_array($m->type, ['image', 'audio', 'pdf', 'document']) ? $this->getMediaUrl($m->text) : ($m->text ?? ''),
+                    'text'        => in_array($m->type, ['image', 'audio', 'pdf', 'document']) ? $this->getMediaUrl($m->media_url ?? $m->text) : ($m->text ?? ''),
                     'type'        => $m->type,
                     'amount'      => $m->amount,
                     'media_url'   => $m->media_url ? $this->getMediaUrl($m->media_url) : null,
@@ -64,6 +64,7 @@ class GroupMessageController extends Controller
                     'media_name'  => $m->media_name,
                     'media_size'  => $m->media_size,
                     'created_at'  => $m->created_at->toIso8601String(),
+                    'caption'     => in_array($m->type, ['image', 'audio', 'pdf']) && $m->media_url && $m->text !== '[Gambar]' ? $m->text : null,
                 ];
             });
 
@@ -166,7 +167,7 @@ class GroupMessageController extends Controller
             'sender_id'   => (string) $message->sender_id,
             'sender_name' => $currentUser->name,
             'sender_photo'=> $currentUser->profile_photo,
-            'text'        => in_array($message->type, ['image', 'audio', 'pdf', 'document']) ? $this->getMediaUrl($message->text) : ($message->text ?? ''),
+            'text'        => in_array($message->type, ['image', 'audio', 'pdf', 'document']) ? $this->getMediaUrl($message->media_url ?? $message->text) : ($message->text ?? ''),
             'type'        => $message->type,
             'amount'      => $message->amount,
             'media_url'   => $message->media_url ? $this->getMediaUrl($message->media_url) : null,
@@ -174,6 +175,7 @@ class GroupMessageController extends Controller
             'media_name'  => $message->media_name,
             'media_size'  => $message->media_size,
             'created_at'  => $message->created_at->toIso8601String(),
+            'caption'     => in_array($message->type, ['image', 'audio', 'pdf']) && $message->media_url && $message->text !== '[Gambar]' ? $message->text : null,
         ];
 
         // Broadcast ke Pusher
