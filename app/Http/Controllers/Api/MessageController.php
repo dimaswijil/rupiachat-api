@@ -43,7 +43,7 @@ class MessageController extends Controller
             ->map(fn($m) => [
                 'id' => (string) $m->id,
                 'sender_id' => (string) $m->sender_id,
-                'text' => in_array($m->type, ['image', 'audio', 'pdf', 'document']) ? $this->getMediaUrl($m->text) : ($m->text ?? ''),
+                'text' => in_array($m->type, ['image', 'audio', 'pdf', 'document']) ? $this->getMediaUrl($m->media_url ?? $m->text) : ($m->text ?? ''),
                 'type' => $m->type,
                 'amount' => $m->amount,
                 'media_url' => $m->media_url ? $this->getMediaUrl($m->media_url) : null,
@@ -52,6 +52,7 @@ class MessageController extends Controller
                 'media_size' => $m->media_size,
                 'is_read' => (bool) $m->is_read,
                 'created_at' => $m->created_at->toIso8601String(),
+                'caption' => in_array($m->type, ['image', 'audio', 'pdf']) && $m->media_url && $m->text !== '[Gambar]' ? $m->text : null,
             ]);
 
         return response()->json(['data' => $messages]);
@@ -136,7 +137,7 @@ class MessageController extends Controller
         $messageData = [
             'id' => (string) $message->id,
             'sender_id' => (string) $message->sender_id,
-            'text' => in_array($message->type, ['image', 'audio', 'pdf', 'document']) ? $this->getMediaUrl($message->text) : ($message->text ?? ''),
+            'text' => in_array($message->type, ['image', 'audio', 'pdf', 'document']) ? $this->getMediaUrl($message->media_url ?? $message->text) : ($message->text ?? ''),
             'type' => $message->type,
             'amount' => $message->amount,
             'media_url' => $message->media_url ? $this->getMediaUrl($message->media_url) : null,
@@ -145,6 +146,7 @@ class MessageController extends Controller
             'media_size' => $message->media_size,
             'is_read' => false,
             'created_at' => $message->created_at->toIso8601String(),
+            'caption' => in_array($message->type, ['image', 'audio', 'pdf']) && $message->media_url && $message->text !== '[Gambar]' ? $message->text : null,
         ];
 
         event(new MessageSent($request->room_id, $messageData));
