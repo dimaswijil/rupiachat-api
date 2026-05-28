@@ -3,6 +3,8 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\WalletController;
+use App\Http\Controllers\Api\PurchaseController;
+use App\Http\Controllers\Api\ExchangeRateController;
 use App\Http\Controllers\Api\GroupController;
 use App\Http\Controllers\Api\GroupMessageController;
 use Illuminate\Support\Facades\Route;
@@ -45,11 +47,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/rooms/pin', [MessageController::class, 'pin']);
     Route::post('/rooms/delete', [MessageController::class, 'deleteRoom']);
 
-    // Wallet
+    // Wallet (hanya saldo + top up, transfer dihapus)
     Route::get('/wallet', [WalletController::class, 'index']);
     Route::post('/wallet/topup', [WalletController::class, 'topup']);
-    Route::get('/wallet/history', [WalletController::class, 'history']);
-    Route::post('/wallet/transfer', [WalletController::class, 'transfer']);
+
+    // Purchase (beli fitur)
+    Route::post('/purchases', [PurchaseController::class, 'store']);
+    Route::get('/purchases/my', [PurchaseController::class, 'myPurchases']);
+    Route::get('/features/my', [PurchaseController::class, 'myFeatures']);
+
+    // Exchange Rate (kurs USD/IDR)
+    Route::get('/exchange-rate', [ExchangeRateController::class, 'index']);
 
     // FCM token update
     Route::post('/user/fcm-token', function (\Illuminate\Http\Request $request) {

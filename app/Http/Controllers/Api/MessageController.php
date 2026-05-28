@@ -14,6 +14,18 @@ use Kreait\Firebase\Messaging\Notification;
 
 class MessageController extends Controller
 {
+    private function getMediaUrl($text)
+    {
+        if (empty($text)) return '';
+        if (str_starts_with($text, 'http://') || str_starts_with($text, 'https://')) {
+            if (preg_match('/storage\/(messages|group_messages|messages_audio|group_messages_audio|group_messages_documents|messages_documents)\/(.+)$/', $text, $matches)) {
+                return url('storage/' . $matches[1] . '/' . $matches[2]);
+            }
+            return $text;
+        }
+        return url($text);
+    }
+
     // ── LOAD HISTORY PESAN ────────────────────────────────────
     public function index($roomId)
     {
@@ -31,9 +43,13 @@ class MessageController extends Controller
             ->map(fn($m) => [
                 'id' => (string) $m->id,
                 'sender_id' => (string) $m->sender_id,
-                'text' => $m->text ?? '',
+                'text' => in_array($m->type, ['image', 'audio', 'pdf', 'document']) ? $this->getMediaUrl($m->text) : ($m->text ?? ''),
                 'type' => $m->type,
                 'amount' => $m->amount,
+                'media_url' => $m->media_url ? $this->getMediaUrl($m->media_url) : null,
+                'media_type' => $m->media_type,
+                'media_name' => $m->media_name,
+                'media_size' => $m->media_size,
                 'is_read' => (bool) $m->is_read,
                 'created_at' => $m->created_at->toIso8601String(),
             ]);
@@ -48,9 +64,11 @@ class MessageController extends Controller
             'room_id' => 'required|string',
             'sender_id' => 'required|string',
             'text' => 'required_if:type,text|string',
-            'type' => 'required|in:text,payment,image,call',
+            'type' => 'required|in:text,payment,image,call,sticker,audio,pdf',
             'amount' => 'required_if:type,payment|string',
             'image' => 'required_if:type,image|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'audio' => 'required_if:type,audio|file|mimes:m4a,mp3,aac,wav,ogg|max:10240',
+            'document' => 'required_if:type,pdf|file|mimes:pdf|max:10240',
         ]);
 
         if ($validator->fails()) {
@@ -67,7 +85,21 @@ class MessageController extends Controller
         if ($request->hasFile('image') && $request->type == 'image') {
             $file = $request->file('image');
             $path = $file->store('messages', 'public');
-            $mediaUrl = url('storage/' . $path);
+            $mediaUrl = 'storage/' . $path;
+            $mediaType = $file->getMimeType();
+            $mediaName = $file->getClientOriginalName();
+            $mediaSize = $file->getSize();
+        } elseif ($request->hasFile('audio') && $request->type == 'audio') {
+            $file = $request->file('audio');
+            $path = $file->store('messages_audio', 'public');
+            $mediaUrl = 'storage/' . $path;
+            $mediaType = $file->getMimeType();
+            $mediaName = $file->getClientOriginalName();
+            $mediaSize = $file->getSize();
+        } elseif ($request->hasFile('document') && $request->type == 'pdf') {
+            $file = $request->file('document');
+            $path = $file->store('messages_documents', 'public');
+            $mediaUrl = 'storage/' . $path;
             $mediaType = $file->getMimeType();
             $mediaName = $file->getClientOriginalName();
             $mediaSize = $file->getSize();
@@ -88,9 +120,13 @@ class MessageController extends Controller
         $messageData = [
             'id' => (string) $message->id,
             'sender_id' => (string) $message->sender_id,
-            'text' => $message->text ?? '',
+            'text' => in_array($message->type, ['image', 'audio', 'pdf', 'document']) ? $this->getMediaUrl($message->text) : ($message->text ?? ''),
             'type' => $message->type,
             'amount' => $message->amount,
+            'media_url' => $message->media_url ? $this->getMediaUrl($message->media_url) : null,
+            'media_type' => $message->media_type,
+            'media_name' => $message->media_name,
+            'media_size' => $message->media_size,
             'is_read' => false,
             'created_at' => $message->created_at->toIso8601String(),
         ];

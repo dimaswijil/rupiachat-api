@@ -239,7 +239,7 @@ class AgoraController extends Controller
         $request->validate([
             'target_id' => 'required|exists:users,id', // Kepada siapa sinyal dikirim
             'channel_name' => 'required|string',
-            'signal_type' => 'required|in:cancel,decline,accept,end', 
+            'signal_type' => 'required|in:cancel,decline,accept,end,request_video,accept_video,decline_video', 
         ]);
 
         $sender = $request->user();
