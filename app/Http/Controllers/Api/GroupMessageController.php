@@ -87,14 +87,23 @@ class GroupMessageController extends Controller
             return response()->json(['message' => 'Anda bukan member grup ini'], 403);
         }
 
-        $validator = Validator::make($request->all(), [
+        $rules = [
             'text'   => 'required_if:type,text|string',
             'type'   => 'required|in:text,payment,image,call,sticker,audio,pdf',
             'amount' => 'required_if:type,payment|string',
             'image'  => 'required_if:type,image|image|mimes:jpeg,png,jpg,gif|max:5120',
             'audio'  => 'required_if:type,audio|file|mimes:m4a,mp3,aac,wav,ogg|max:10240',
             'document' => 'required_if:type,pdf|file|mimes:pdf|max:10240',
-        ]);
+        ];
+
+        // Jika klien mengirim URL publik secara langsung (misal Supabase Storage), hilangkan validasi file biner wajib
+        if ($request->filled('text') && in_array($request->type, ['image', 'audio', 'pdf'])) {
+            unset($rules['image']);
+            unset($rules['audio']);
+            unset($rules['document']);
+        }
+
+        $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             return response()->json([
@@ -128,6 +137,13 @@ class GroupMessageController extends Controller
             $mediaType = $file->getMimeType();
             $mediaName = $file->getClientOriginalName();
             $mediaSize = $file->getSize();
+        }
+
+        // Sinkronisasi data media dari URL jika diunggah via Supabase Storage
+        if (!$mediaUrl && $request->filled('text') && in_array($request->type, ['image', 'audio', 'pdf'])) {
+            $mediaUrl = $request->text;
+            $mediaType = $request->type == 'pdf' ? 'application/pdf' : ($request->type == 'audio' ? 'audio/mpeg' : 'image/jpeg');
+            $mediaName = basename(parse_url($request->text, PHP_URL_PATH) ?? $request->text);
         }
 
         $currentUser = $request->user();
