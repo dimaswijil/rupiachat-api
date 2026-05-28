@@ -12,6 +12,9 @@ RUN composer install --no-dev --optimize-autoloader
 # Set storage/cache permissions
 RUN chown -R application:application /app/storage /app/bootstrap/cache
 
+# Symlink CA certificates to match the MYSQL_ATTR_SSL_CA (/etc/ssl/cert.pem) path on Alpine
+RUN ln -sf /etc/ssl/certs/ca-certificates.crt /etc/ssl/cert.pem
+
 # Set Laravel public as document root
 ENV WEB_DOCUMENT_ROOT=/app/public
 
