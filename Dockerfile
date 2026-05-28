@@ -35,3 +35,5 @@ php artisan view:cache\n\
 php artisan migrate --force\n\
 php artisan storage:link 2>/dev/null || true\n' > /opt/docker/provision/entrypoint.d/99-laravel.sh \
   && chmod +x /opt/docker/provision/entrypoint.d/99-laravel.sh
+
+CMD ["/opt/docker/bin/entrypoint.sh", "supervisord"]
