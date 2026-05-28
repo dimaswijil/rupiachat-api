@@ -1,0 +1,7 @@
+.git
+.env
+vendor
+node_modules
+.phpunit.result.cache
+storage/app/public/*
+!storage/app/public/.gitignore
