@@ -35,7 +35,7 @@ class WalletController extends Controller
         // Save pending transaction
         WalletTransaction::create([
             'user_id' => $user->id,
-            'midtrans_order_id' => $orderId,
+            'order_id' => $orderId,
             'amount' => $request->amount,
             'type' => 'topup',
             'status' => 'pending',
@@ -48,8 +48,8 @@ class WalletController extends Controller
             'external_id' => $orderId,
             'amount' => (int) $request->amount,
             'description' => 'Top Up Saldo RupiaChat',
-            'success_redirect_url' => 'https://example.com/success',
-            'failure_redirect_url' => 'https://example.com/failed',
+            'success_redirect_url' => url('/api/payment/success'),
+            'failure_redirect_url' => url('/api/payment/failed'),
         ];
 
         try {
@@ -86,8 +86,7 @@ class WalletController extends Controller
         $orderId = $notif['external_id'] ?? '';
         $status = $notif['status'] ?? '';
 
-        // Masih menggunakan kolom midtrans_order_id di database
-        $trx = WalletTransaction::where('midtrans_order_id', $orderId)->first();
+        $trx = WalletTransaction::where('order_id', $orderId)->first();
 
         if (!$trx) {
             return response()->json(['message' => 'Transaction not found'], 404);
@@ -110,6 +109,36 @@ class WalletController extends Controller
         $trx->save();
 
         return response()->json(['message' => 'OK']);
+    }
+
+    public function paymentSuccess()
+    {
+        return response(
+            '<html>
+                <body style="display:flex; justify-content:center; align-items:center; height:100vh; background-color:#E8F5E9; font-family:sans-serif; text-align:center;">
+                    <div>
+                        <h1 style="color:#2E7D32;">Pembayaran Berhasil!</h1>
+                        <p>Saldo Anda akan segera ditambahkan.</p>
+                        <p style="font-weight:bold; margin-top:20px;">Silakan tekan tombol <b>Selesai (Done)</b> atau tanda silang <b>(X)</b> di pojok atas untuk kembali ke aplikasi.</p>
+                    </div>
+                </body>
+            </html>'
+        )->header('Content-Type', 'text/html');
+    }
+
+    public function paymentFailed()
+    {
+        return response(
+            '<html>
+                <body style="display:flex; justify-content:center; align-items:center; height:100vh; background-color:#FFEBEE; font-family:sans-serif; text-align:center;">
+                    <div>
+                        <h1 style="color:#C62828;">Pembayaran Gagal!</h1>
+                        <p>Transaksi Anda tidak dapat diproses saat ini.</p>
+                        <p style="font-weight:bold; margin-top:20px;">Silakan tekan tombol <b>Selesai (Done)</b> atau tanda silang <b>(X)</b> di pojok atas untuk kembali ke aplikasi.</p>
+                    </div>
+                </body>
+            </html>'
+        )->header('Content-Type', 'text/html');
     }
 
 }

@@ -13,7 +13,9 @@ use Illuminate\Support\Facades\Route;
 Route::get("/ping", function () { return response()->json(["status" => "ok"]); });
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/midtrans/webhook', [WalletController::class, 'webhook']);
+Route::post('/xendit/webhook', [WalletController::class, 'webhook']);
+Route::get('/payment/success', [WalletController::class, 'paymentSuccess']);
+Route::get('/payment/failed', [WalletController::class, 'paymentFailed']);
 
 // ── OTP Verification ──────────────────────────────────────
 Route::post('/auth/request-otp', [AuthController::class, 'requestOtp']);
