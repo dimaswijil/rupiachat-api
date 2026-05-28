@@ -124,7 +124,7 @@ class MessageController extends Controller
         $message = Message::create([
             'room_id' => $request->room_id,
             'sender_id' => $request->sender_id,
-            'text' => $mediaUrl ? $mediaUrl : $request->text,
+            'text' => $request->filled('caption') ? $request->caption : ($mediaUrl ? $mediaUrl : $request->text),
             'type' => $request->type ?? 'text',
             'amount' => $request->amount,
             'media_url' => $mediaUrl,

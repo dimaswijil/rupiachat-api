@@ -151,7 +151,7 @@ class GroupMessageController extends Controller
         $message = GroupMessage::create([
             'group_id'   => $id,
             'sender_id'  => $currentUser->id,
-            'text'       => $mediaUrl ? $mediaUrl : $request->text,
+            'text'       => $request->filled('caption') ? $request->caption : ($mediaUrl ? $mediaUrl : $request->text),
             'type'       => $request->type ?? 'text',
             'amount'     => $request->amount,
             'media_url'  => $mediaUrl,
