@@ -64,6 +64,33 @@ flowchart TD
 
 ---
 
+## ✨ Fitur-Fitur Utama RupiaChat (Core Features)
+
+RupiaChat menggabungkan fungsionalitas obrolan waktu-nyata berkinerja tinggi dengan sistem transaksi finansial digital yang aman dan modular:
+
+### 💬 1. Sistem Obrolan & Kolaborasi (Real-Time Communication)
+*   **Obrolan Personal & Grup:** Komunikasi 1-on-1 dan obrolan grup instan.
+*   **Reactive Read Receipts & Typing Indicators:** Mengetahui kapan lawan bicara sedang mengetik dan membaca pesan Anda secara instan ditenagai oleh *Pusher WebSockets*.
+*   **Berbagi Berkas Kaya (Rich Media Sharing):** Pengiriman Pesan Suara (Voice Notes) berformat `.m4a`, Dokumen PDF, dan Gambar beresolusi tinggi langsung ke *Supabase Storage Buckets*.
+
+### 📞 2. VoIP & Video Call Native (VoIP Calling)
+*   **Agora RTC Integration:** Panggilan suara dan video berkinerja tinggi dengan latensi super rendah.
+*   **Native CallKit Integration:** Menerima panggilan masuk langsung di layar utama perangkat (Heads-Up Incoming Call Notification) menggunakan `flutter_callkit_incoming` bahkan saat aplikasi berada di latar belakang (*background*).
+
+### 💳 3. Dompet Digital & Integrasi Payment Gateway (Digital Wallet & Payment)
+*   **Sistem Dompet Mandiri (Self-Managed Wallet):** Manajemen saldo rupiah secara langsung terhubung dengan database TiDB Cloud yang andal.
+*   **Top-Up Instan Xendit:** Pembuatan Invoice top-up dinamis yang otomatis terintegrasi dengan Payment Gateway nasional Xendit.
+*   **USD to IDR Live Exchange Rate:** Konversi mata uang Dollar (USD) ke Rupiah (IDR) secara akurat melalui API internal backend.
+
+### 👑 4. Toko Fitur Premium & Membership VIP (Premium Feature Store)
+*   **Sistem Pembelian Fitur Modular:** Pengguna dapat membeli fitur spesifik secara modular langsung menggunakan saldo dompet digital mereka.
+*   **Hak Akses Dinamis (Feature Entitlement):** Pemeriksaan lisensi dinamis di tingkat klien (`isFeatureUnlocked`) untuk membuka fitur eksklusif, termasuk membership VIP untuk akses tak terbatas.
+
+### 🎨 5. Kustomisasi Tema Pro Dinamis (Dynamic Custom Themes)
+*   **Pro-User Palette Mutator:** Pengguna pro dapat mengubah warna primer tema aplikasi (`RupiaColors.primary`) secara waktu-nyata yang tersimpan secara lokal dan langsung di-render melalui `ValueNotifier` tanpa harus memulai ulang (*restart*) aplikasi.
+
+---
+
 ## 🎨 1. Arsitektur Sisi Klien & Preview Kode (Flutter Client Structure)
 
 Struktur kode aplikasi Flutter diatur menggunakan **Layered Architecture** dengan fokus penuh pada pemisahan state, UI, dan komunikasi server.
