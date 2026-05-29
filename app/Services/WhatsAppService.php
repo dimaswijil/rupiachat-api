@@ -18,8 +18,8 @@ class WhatsAppService
 
     public function __construct()
     {
-        $this->token = env('WHATSAPP_API_TOKEN', '');
-        $this->phoneNumberId = env('WHATSAPP_PHONE_NUMBER_ID', '');
+        $this->token = config('services.whatsapp.token', '');
+        $this->phoneNumberId = config('services.whatsapp.phone_number_id', '');
     }
 
     /**
@@ -47,7 +47,8 @@ class WhatsAppService
         $url = "https://graph.facebook.com/{$this->apiVersion}/{$this->phoneNumberId}/messages";
 
         try {
-            $response = Http::withToken($this->token)
+            $response = Http::timeout(5)
+                ->withToken($this->token)
                 ->post($url, [
                     'messaging_product' => 'whatsapp',
                     'to' => $phone,

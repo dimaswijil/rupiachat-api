@@ -52,7 +52,7 @@ class MessageController extends Controller
                 'media_size' => $m->media_size,
                 'is_read' => (bool) $m->is_read,
                 'created_at' => $m->created_at->toIso8601String(),
-                'caption' => in_array($m->type, ['image', 'audio', 'pdf']) && $m->media_url && $m->text !== '[Gambar]' ? $m->text : null,
+                'caption' => in_array($m->type, ['image', 'audio', 'pdf']) && $m->media_url && $m->text !== $m->media_url && !in_array($m->text, ['[Gambar]', '[Dokumen PDF]', '[Audio]']) ? $m->text : null,
             ]);
 
         return response()->json(['data' => $messages]);
@@ -146,7 +146,7 @@ class MessageController extends Controller
             'media_size' => $message->media_size,
             'is_read' => false,
             'created_at' => $message->created_at->toIso8601String(),
-            'caption' => in_array($message->type, ['image', 'audio', 'pdf']) && $message->media_url && $message->text !== '[Gambar]' ? $message->text : null,
+            'caption' => in_array($message->type, ['image', 'audio', 'pdf']) && $message->media_url && $message->text !== $message->media_url && !in_array($message->text, ['[Gambar]', '[Dokumen PDF]', '[Audio]']) ? $message->text : null,
         ];
 
         event(new MessageSent($request->room_id, $messageData));
@@ -179,6 +179,20 @@ class MessageController extends Controller
                 $previewText = '💰 Pembayaran';
             } elseif ($message->type === 'call') {
                 $previewText = '📞 Panggilan';
+                $callData = json_decode($message->text, true);
+                if (is_array($callData)) {
+                    $isVideo = ($callData['call_type'] ?? '') === 'video';
+                    $status = $callData['status'] ?? '';
+                    if ($status === 'missed' || $status === 'declined') {
+                        $previewText = $isVideo ? '📹 Panggilan Video Tak Terjawab' : '📞 Panggilan Suara Tak Terjawab';
+                    } elseif ($status === 'answered') {
+                        $previewText = $isVideo ? '📹 Panggilan Video Selesai' : '📞 Panggilan Suara Selesai';
+                    }
+                }
+            } elseif ($message->type === 'pdf') {
+                $previewText = '📄 Dokumen PDF';
+            } elseif ($message->type === 'audio') {
+                $previewText = '🎵 Pesan Suara';
             }
 
             $credentialsPath = storage_path('app/firebase-credentials.json');

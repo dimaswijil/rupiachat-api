@@ -42,7 +42,7 @@ class WalletController extends Controller
         ]);
 
         // Xendit Secret Key configured in .env
-        $secretKey = env('XENDIT_SECRET_KEY', '');
+        $secretKey = config('services.xendit.secret_key', '');
 
         $payload = [
             'external_id' => $orderId,
@@ -74,11 +74,11 @@ class WalletController extends Controller
     // Xendit Webhook
     public function webhook(Request $request)
     {
-        $webhookToken = env('XENDIT_WEBHOOK_TOKEN', '');
+        $webhookToken = config('services.xendit.webhook_token', '');
         
         // Verify Xendit Webhook Token
         $reqToken = $request->header('x-callback-token');
-        if ($reqToken !== $webhookToken && env('APP_ENV') !== 'local') {
+        if ($reqToken !== $webhookToken && !app()->environment('local')) {
             return response()->json(['message' => 'Invalid webhook token'], 403);
         }
 
