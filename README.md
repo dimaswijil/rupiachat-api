@@ -1,59 +1,112 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🚀 RupiaChat API - System Architecture & Documentation
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Selamat datang di repositori backend **RupiaChat API**. Dokumen ini menjelaskan secara rinci tentang arsitektur sistem, pola desain, integrasi cloud, dan teknologi yang kita gunakan di seluruh ekosistem RupiaChat (Flutter Client & Laravel API Backend).
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🏗️ Gambaran Arsitektur Sistem (System Architecture)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+RupiaChat menggunakan arsitektur **Client-Server** modern dengan komunikasi berbasis **RESTful API** untuk transaksi data dan protokol **WebSockets / Event-Driven** untuk sinkronisasi waktu-nyata (*real-time*).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+```mermaid
+graph TD
+    subgraph Client [Flutter Client Apps]
+        F[Flutter UI App]
+        F1[ValueNotifier State]
+        F2[Service Layer]
+    end
 
-## Learning Laravel
+    subgraph Backend [Laravel API Server]
+        L[Laravel Framework]
+        L1[RESTful Controllers]
+        L2[Eloquent ORM]
+        L3[FCM / Notification Gateway]
+    end
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+    subgraph Cloud [Cloud & Database Infrastructure]
+        T[TiDB Cloud Database]
+        S[Supabase Cloud Storage]
+        P[Pusher Channels Real-Time]
+        FCM[Firebase Cloud Messaging]
+    end
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+    F -->|User Interaction| F1
+    F1 --> F2
+    F2 -->|HTTPS REST Request| L1
+    L1 --> L2
+    L2 -->|Read/Write SQL| T
+    L1 -->|Uploads PDF/Audio| S
+    L1 -->|Trigger Sync Event| P
+    L1 -->|Trigger Heads-Up Call| FCM
+    P -->|WebSocket Stream| F
+    FCM -->|Push Notification| F
+```
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 📱 1. Arsitektur Sisi Klien (Flutter Client Architecture)
 
-### Premium Partners
+Pada aplikasi Flutter, kita menerapkan pola **Layered Architecture (Arsitektur Berlapis)** untuk memisahkan logika bisnis dari UI:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### A. Pola Desain (Design Patterns)
+*   **Service Layer Pattern**: Seluruh komunikasi API didekapsulasi ke dalam kelas layanan terisolasi seperti `AuthService`, `ChatService`, `GroupService`, `PurchaseService`, `SupabaseStorageService`, dan `CallApiService`.
+*   **Reactive State Management**: Menggunakan **`ValueNotifier`** dan **`ValueListenableBuilder`** yang ringan untuk pembaruan UI real-time (seperti pengetikan, perubahan warna palet tema, indeks navigasi, dll.) tanpa overhead dari package berat.
+*   **Model-Driven Architecture (Serialization)**: Setiap payload JSON dari backend dipetakan secara ketat (*type-safe*) ke dalam model Dart seperti `UserModel`, `MessageModel`, `GroupModel`, dan `GroupMessageModel`.
 
-## Contributing
+### B. Integrasi Perangkat & Fitur Utama
+*   **Real-Time VoIP & Video Call**: Menggunakan **Agora RTC SDK** (`agora_rtc_engine`) dikombinasikan dengan `flutter_callkit_incoming` untuk heads-up call native.
+*   **Voice Note Recording & Playback**: Ditenagai oleh **`record`** untuk kompresi audio AAC-LC lokal ke format `.m4a` dan **`audioplayers`** untuk pemutaran audio interaktif.
+*   **Dynamic Theme Palettes**: Manajemen skema warna mutable (`RupiaColors.primary`) yang disimpan secara lokal di `SharedPreferences` dan diperbarui di seluruh aplikasi via `AnimatedTheme` tanpa restart aplikasi.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+## 💻 2. Arsitektur Sisi Server (Laravel API Backend Architecture)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Backend dibangun di atas framework **Laravel** dengan arsitektur **MVC (Model-View-Controller)** yang disesuaikan khusus untuk melayani API (*API-only application*):
 
-## Security Vulnerabilities
+### A. Pola Desain & Logika Bisnis
+*   **RESTful Controllers**: Controllers terorganisasi secara modular untuk menangani resource obrolan (`MessageController`, `GroupMessageController`), manajemen grup (`GroupController`), otentikasi (`UserController`), dan modul premium (`PurchaseController`).
+*   **Self-Healing Ngrok / Media URLs Helper**: Kami menggunakan logika dinamis untuk mendeteksi *base URL* request aktif (termasuk domain dinamis Ngrok) untuk menulis ulang berkas media lokal secara otomatis sebelum JSON dikirim ke Flutter, menjamin tidak ada tautan gambar/audio yang rusak (*broken link*).
+*   **Form Request Validation**: Proteksi ketat terhadap payload masukan, membatasi format berkas seperti PDF dan Audio (AAC/MP3) hingga ukuran maksimum 10MB.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+## ☁️ 3. Infrastruktur & Integrasi Cloud (Cloud Integration)
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+RupiaChat memanfaatkan keunggulan multi-cloud untuk efisiensi performa dan keandalan data:
+
+1.  **TiDB Cloud (Relational Database)**:
+    *   Menggunakan basis data **TiDB Cloud (MySQL compatible)** yang didistribusikan secara global dengan performa transaksi ACID tinggi pada port `4000`, menjamin penyimpanan data obrolan, kontak, dan transaksi yang konsisten dan aman.
+2.  **Supabase Storage (Media Bucket)**:
+    *   Berkas lampiran premium (Gambar, PDF, Audio) diunggah langsung ke *bucket* Supabase melalui SDK, mengembalikan tautan publik permanen untuk mengurangi beban bandwidth pada server utama.
+3.  **Real-Time WebSockets Gateway (Pusher / Supabase)**:
+    *   Mengalirkan status aktif pengguna, indikator sedang mengetik (*typing indicators*), centang dua tanda baca (*read receipts*), dan pesan baru langsung secara instan tanpa proses polling (*polling-free*).
+4.  **Firebase Cloud Messaging (FCM Gateway)**:
+    *   Memicu notifikasi *push* latar belakang berprioritas tinggi (*high-priority background notification*) untuk membangunkan aplikasi penerima saat ada panggilan telepon Agora masuk.
+
+---
+
+## 🛠️ Panduan Pengembangan Lokal (Local Development)
+
+### Persyaratan Sistem (Prerequisites)
+*   PHP `>= 8.2`
+*   Composer `>= 2.0`
+*   MySQL / TiDB Client
+
+### Menjalankan Server API Lokal
+1.  Salin konfigurasi lingkungan:
+    ```bash
+    cp .env.example .env
+    ```
+2.  Instal dependensi PHP:
+    ```bash
+    composer install
+    ```
+3.  Jalankan migrasi database:
+    ```bash
+    php artisan migrate
+    ```
+4.  Jalankan server pengembangan:
+    ```bash
+    php artisan serve
+    ```
