@@ -48,8 +48,15 @@ class AuthController extends Controller
         // Kirim OTP via Email
         try {
             Mail::to($request->email)->send(new OtpVerification($otpCode, 'register'));
+            \Log::info('✅ Email OTP Register berhasil dikirim', ['email' => $request->email]);
         } catch (\Exception $e) {
-            \Log::error('Email OTP pendaftaran gagal: ' . $e->getMessage());
+            \Log::error('❌ Email OTP Register GAGAL', [
+                'email'     => $request->email,
+                'error'     => $e->getMessage(),
+                'exception' => get_class($e),
+                'code'      => $e->getCode(),
+                'file'      => $e->getFile() . ':' . $e->getLine(),
+            ]);
         }
 
         // Kirim OTP via WhatsApp
@@ -282,8 +289,15 @@ class AuthController extends Controller
         // Kirim OTP via Email
         try {
             Mail::to($request->email)->send(new OtpVerification($otpCode, 'reset'));
+            \Log::info('✅ Email Reset OTP berhasil dikirim', ['email' => $request->email]);
         } catch (\Exception $e) {
-            \Log::error('Email Reset OTP gagal: ' . $e->getMessage());
+            \Log::error('❌ Email Reset OTP GAGAL', [
+                'email'     => $request->email,
+                'error'     => $e->getMessage(),
+                'exception' => get_class($e),
+                'code'      => $e->getCode(),
+                'file'      => $e->getFile() . ':' . $e->getLine(),
+            ]);
         }
 
         // Kirim OTP via WhatsApp (karena kita punya phone user)
