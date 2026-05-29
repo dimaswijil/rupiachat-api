@@ -18,20 +18,20 @@ flowchart TD
     classDef fcmClass fill:#FFF2EB,stroke:#E65100,stroke-width:2.5px,color:#5D2000,font-weight:bold;
 
     subgraph Client [📱 Flutter Client App Architecture]
-        style Client fill:#FAFCFF,stroke:#1A3C8F,stroke-width:2px,stroke-dasharray: 4;
+        style Client fill:none,stroke:#1A3C8F,stroke-width:2px,stroke-dasharray: 5 5;
         F["🖥️ Flutter UI App<br>(Widgets & Layouts)"]:::clientClass
         F1["⚡ ValueNotifier State<br>(Reactive Core)"]:::clientClass
         F2["📦 Service Layer<br>(Dio Services)"]:::clientClass
     end
 
     subgraph Backend [💻 Laravel API Server Architecture]
-        style Backend fill:#FFFAFA,stroke:#993C1D,stroke-width:2px,stroke-dasharray: 4;
+        style Backend fill:none,stroke:#993C1D,stroke-width:2px,stroke-dasharray: 5 5;
         L1["⚙️ RESTful Controllers<br>(Modular API Routes)"]:::backendClass
         L2["🗄️ Eloquent ORM<br>(Database Models)"]:::backendClass
     end
 
     subgraph Cloud [☁️ Cloud & Database Infrastructure]
-        style Cloud fill:#FAFFFB,stroke:#0F6E56,stroke-width:2px,stroke-dasharray: 4;
+        style Cloud fill:none,stroke:#0F6E56,stroke-width:2px,stroke-dasharray: 5 5;
         T[("🗃️ TiDB Cloud Database<br>(ACID Transactions)")]:::storageClass
         S["📂 Supabase Cloud Storage<br>(Media Bucket Storage)"]:::storageClass
         P["📡 Pusher Channels Real-Time<br>(WebSockets Pub/Sub)"]:::pusherClass
